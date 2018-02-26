@@ -1,10 +1,13 @@
 <?php
 /*
-Plugin Name: 輔仁網: Timthumb
+Plugin Name: VJMedia: Timthumb
 Description: 把Timthumb獨立出來成為一隻插件
 Version: 1.0
 Author: <a href="http://www.vjmedia.com.hk">技術組</a>
+GitHub Plugin URI: https://github.com/VJMedia/vj-timthumb
 */
+
+function vjtimthumb_dummy(){}
 
 if(defined('ABSPATH')){
 	define ('FILE_CACHE_DIRECTORY', ABSPATH."/wp-content/cache/timthumb/");
