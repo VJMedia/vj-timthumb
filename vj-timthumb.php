@@ -96,7 +96,7 @@ define("WATERMARK_OFFSET_W",20);
 define("WATERMARK_OFFSET_H",0);
 
 if(! isset($ALLOWED_SITES)){
-	$ALLOWED_SITES = array ('ysm.unimhk.com','www.vjmedia.com.hk','virtusjustitia.vjcdn.com','gamer.vjmedia.com.hk','eros.vjmedia.com.hk','style.vjmedia.com.hk','www.vjfilmdom.com','www.vjgamer.com.hk','www.pinslife.com.hk');
+	$ALLOWED_SITES = array ('ysm.unimhk.com','www.vjmedia.com.hk','virtusjustitia.vjcdn.com','gamer.vjmedia.com.hk','eros.vjmedia.com.hk','style.vjmedia.com.hk','www.vjfilmdom.com','www.vjgamer.com.hk','www.pinslife.com.hk','vjgamer.com.hk');
 }
 
 class timthumb {
