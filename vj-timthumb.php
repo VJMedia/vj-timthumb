@@ -56,7 +56,7 @@ if(! defined('ALLOW_ALL_EXTERNAL_SITES') ) 	define ('ALLOW_ALL_EXTERNAL_SITES', 
 if(! defined('FILE_CACHE_ENABLED') ) 		define ('FILE_CACHE_ENABLED', TRUE);					// Should we store resized/modified images on disk to speed things up?
 if(! defined('FILE_CACHE_TIME_BETWEEN_CLEANS'))	define ('FILE_CACHE_TIME_BETWEEN_CLEANS', 60);	// How often the cache is cleaned 
 
-if(! defined('FILE_CACHE_MAX_FILE_AGE') ) 	define ('FILE_CACHE_MAX_FILE_AGE', 360);				// How old does a file have to be to be deleted from the cache
+if(! defined('FILE_CACHE_MAX_FILE_AGE') ) 	define ('FILE_CACHE_MAX_FILE_AGE', 31536000);				// How old does a file have to be to be deleted from the cache
 if(! defined('FILE_CACHE_SUFFIX') ) 		define ('FILE_CACHE_SUFFIX', '.cache');			// What to put at the end of all files in the cache directory so we can identify them
 if(! defined('FILE_CACHE_PREFIX') ) 		define ('FILE_CACHE_PREFIX', 'vjtimthumb_');				// What to put at the beg of all files in the cache directory so we can identify them
 if(! defined('FILE_CACHE_DIRECTORY') ) 		define ('FILE_CACHE_DIRECTORY', './cache');				// Directory where images are cached. Left blank it will use the system temporary directory (which is better for security)
@@ -66,7 +66,7 @@ if(! defined('WAIT_BETWEEN_FETCH_ERRORS') )	define ('WAIT_BETWEEN_FETCH_ERRORS',
 
 if(! defined('BROWSER_CACHE_MAX_AGE') ) 	define ('BROWSER_CACHE_MAX_AGE', 864000);				// Time to cache in the browser
 if(! defined('BROWSER_CACHE_DISABLE') ) 	define ('BROWSER_CACHE_DISABLE', false);				// Use for testing if you want to disable all browser caching
-
+if(! defined('PROXY_CACHE_MAX_AGE') )		define ('PROXY_CACHE_MAX_AGE',864000);
 if(! defined('MAX_WIDTH') ) 			define ('MAX_WIDTH', 1920);									// Maximum image width
 if(! defined('MAX_HEIGHT') ) 			define ('MAX_HEIGHT', 1920);								// Maximum image height
 if(! defined('NOT_FOUND_IMAGE') )		define ('NOT_FOUND_IMAGE', '');								// Image to serve if any 404 occurs 
@@ -988,14 +988,12 @@ class timthumb {
 		header ('Last-Modified: ' . $gmdate_modified);
 		header ('Content-Length: ' . $dataSize);
 		if(BROWSER_CACHE_DISABLE){
-			$this->debug(3, "Browser cache is disabled so setting non-caching headers.");
 			header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 			header("Pragma: no-cache");
 			header('Expires: ' . gmdate ('D, d M Y H:i:s', time()));
 		} else {
-			$this->debug(3, "Browser caching is enabled");
-			header('Cache-Control: max-age=' . BROWSER_CACHE_MAX_AGE . ', must-revalidate');
-			header('Expires: ' . $gmdate_expires);
+			header('Cache-Control: public, s-maxage=' . PROXY_CACHE_MAX_AGE . ', max-age=' . BROWSER_CACHE_MAX_AGE . ', must-revalidate');
+			//header('Expires: ' . $gmdate_expires);
 		}
 		return true;
 	}
