@@ -121,9 +121,9 @@ if (defined( 'WPINC' ) ) {
 	if(! defined('CURL_TIMEOUT') )				define ('CURL_TIMEOUT', 10);							// Timeout duration for Curl. This only applies if you have Curl installed and aren't using PHP's default URL fetching mechanism.
 	if(! defined('WAIT_BETWEEN_FETCH_ERRORS') )	define ('WAIT_BETWEEN_FETCH_ERRORS', 3600);				// Time to wait between errors fetching remote file
 
-	if(! defined('BROWSER_CACHE_MAX_AGE') ) 	define ('BROWSER_CACHE_MAX_AGE', 864005);				// Time to cache in the browser
+	if(! defined('BROWSER_CACHE_MAX_AGE') ) 	define ('BROWSER_CACHE_MAX_AGE', 315360001);				// Time to cache in the browser
 	if(! defined('BROWSER_CACHE_DISABLE') ) 	define ('BROWSER_CACHE_DISABLE', false);				// Use for testing if you want to disable all browser caching
-	if(! defined('PROXY_CACHE_MAX_AGE') )		define ('PROXY_CACHE_MAX_AGE',864006);
+	if(! defined('PROXY_CACHE_MAX_AGE') )		define ('PROXY_CACHE_MAX_AGE',315360002);
 	if(! defined('MAX_WIDTH') ) 				define ('MAX_WIDTH', 1920);									// Maximum image width
 	if(! defined('MAX_HEIGHT') ) 				define ('MAX_HEIGHT', 1920);								// Maximum image height
 	if(! defined('NOT_FOUND_IMAGE') )			define ('NOT_FOUND_IMAGE', '');								// Image to serve if any 404 occurs 
