@@ -9,6 +9,13 @@ GitHub Plugin URI: https://github.com/VJMedia/vj-timthumb
 
 function vjtimthumb_dummy(){}
 
+function vjtimthumb_muselfdeactive(){
+	global $vjtimthumb_needdeactivate;
+	if($vjtimthumb_needdeactivate){
+		deactivate_plugins( VJTIMTHUMB_PATH );
+	}
+} add_action('wp_loaded','vjtimthumb_muselfdeactive');
+
 if(defined('ABSPATH')){
 	define ('FILE_CACHE_DIRECTORY', ABSPATH."/wp-content/cache/timthumb/");
 	add_action( 'wp_ajax_nopriv_vjtimthumb', 'vjtimthumb_callback' );
@@ -111,7 +118,7 @@ if (defined( 'WPINC' ) ) {
 	if(! defined('ALLOW_EXTERNAL') )			define ('ALLOW_EXTERNAL', TRUE);						// Allow image fetching from external websites. Will check against ALLOWED_SITES if ALLOW_ALL_EXTERNAL_SITES is false
 	if(! defined('ALLOW_ALL_EXTERNAL_SITES') ) 	define ('ALLOW_ALL_EXTERNAL_SITES', false);				// Less secure. 
 	if(! defined('FILE_CACHE_ENABLED') ) 		define ('FILE_CACHE_ENABLED', TRUE);					// Should we store resized/modified images on disk to speed things up?
-	if(! defined('FILE_CACHE_TIME_BETWEEN_CLEANS'))	define ('FILE_CACHE_TIME_BETWEEN_CLEANS', 60);	// How often the cache is cleaned 
+	if(! defined('FILE_CACHE_TIME_BETWEEN_CLEANS'))	define ('FILE_CACHE_TIME_BETWEEN_CLEANS', 864000);	// How often the cache is cleaned 
 
 	if(! defined('FILE_CACHE_MAX_FILE_AGE') ) 	define ('FILE_CACHE_MAX_FILE_AGE', 31536000);				// How old does a file have to be to be deleted from the cache
 	if(! defined('FILE_CACHE_SUFFIX') ) 		define ('FILE_CACHE_SUFFIX', '.cache');			// What to put at the end of all files in the cache directory so we can identify them

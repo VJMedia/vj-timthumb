@@ -12,8 +12,10 @@ if ( ! defined( 'WPINC' ) ) { die; }
 
 define('VJTIMTHUMB_PATH','vj-timthumb/vj-timthumb.php');
 
-if ( ! function_exists( 'vjtimthumb_dummy' ) ) {
+if ( ! function_exists( 'vjtimthumb_dummy' )  && ! in_array(VJTIMTHUMB_PATH,get_option('active_plugins')) ) {
         require trailingslashit( WP_PLUGIN_DIR ) . VJTIMTHUMB_PATH;
+}else{
+	$vjtimthumb_needdeactivate=true;
 }
 
 function vjtimthumb_deactivate( $plugin, $network_wide ) {
