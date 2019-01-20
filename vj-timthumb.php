@@ -9,12 +9,16 @@ GitHub Plugin URI: https://github.com/VJMedia/vj-timthumb
 
 function vjtimthumb_dummy(){}
 
-function vjtimthumb_muselfdeactive(){
-	global $vjtimthumb_needdeactivate;
-	if($vjtimthumb_needdeactivate){
-		deactivate_plugins( VJTIMTHUMB_PATH );
-	}
-} add_action('wp_loaded','vjtimthumb_muselfdeactive');
+if(defined('WPINC')){
+
+	function vjtimthumb_muselfdeactive(){
+		global $vjtimthumb_needdeactivate;
+		if($vjtimthumb_needdeactivate){
+			deactivate_plugins( VJTIMTHUMB_PATH );
+		}
+	} add_action('wp_loaded','vjtimthumb_muselfdeactive');
+	
+}
 
 if(defined('ABSPATH')){
 	define ('FILE_CACHE_DIRECTORY', ABSPATH."/wp-content/cache/timthumb/");
