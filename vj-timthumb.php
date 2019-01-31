@@ -10,17 +10,15 @@ GitHub Plugin URI: https://github.com/VJMedia/vj-timthumb
 function vjtimthumb_dummy(){}
 
 if(defined('WPINC')){
-
 	function vjtimthumb_muselfdeactive(){
 		global $vjtimthumb_needdeactivate;
 		if($vjtimthumb_needdeactivate){
 			deactivate_plugins( VJTIMTHUMB_PATH );
 		}
 	} add_action('wp_loaded','vjtimthumb_muselfdeactive');
-	
 }
 
-if(defined('ABSPATH')){
+/*if(defined('ABSPATH')){
 	define ('FILE_CACHE_DIRECTORY', ABSPATH."/wp-content/cache/timthumb/");
 	add_action( 'wp_ajax_nopriv_vjtimthumb', 'vjtimthumb_callback' );
 }
@@ -29,7 +27,7 @@ function vjtimthumb_callback() {
 	unset($_GET["action"]);
 	timthumb::start();
 	wp_die();
-}
+}*/
 
 if (!function_exists('imagettftextblur')){
     function imagettftextblur(&$image,$size,$angle,$x,$y,$color,$fontfile,$text,$blur_intensity = null)
@@ -56,10 +54,18 @@ if (!function_exists('imagettftextblur')){
     }
 }
 
-
 if (defined( 'WPINC' ) ) {
 
-	
+	define ('FILE_CACHE_DIRECTORY', ABSPATH."/wp-content/cache/timthumb/");
+
+	function vjtimthumb_callback() {
+		global $wpdb;
+		unset($_GET["action"]);
+		timthumb::start();
+		wp_die();
+	}
+
+	add_action( 'wp_ajax_nopriv_vjtimthumb', 'vjtimthumb_callback' );
 
 	function vjtt_settings() {
 		register_setting( 'vjtt-settingsgroup', 'vjtt_watermarkfile' );
@@ -85,27 +91,27 @@ if (defined( 'WPINC' ) ) {
 	</form>
 	</div>
 	<?php }
-	
+
 	function vjtt_adminmenu(){
 		add_menu_page('Timthumb Settings', 'Timthumb Settings', 'administrator', __FILE__, 'vjtt_settingspage' , 'dashicons-images-alt2');
 		add_action( 'admin_init', 'vjtt_settings' );
 	} add_action('admin_menu', 'vjtt_adminmenu');
-		
-}else{ //! defined( 'WPINC' )
+
+	}else{ //! defined( 'WPINC' )
 
 	$root = dirname(dirname(dirname(dirname(__FILE__))));
 	$rawconfig = file_get_contents($root.'/wp-config.php');
-	
+
 	preg_match_all('/define\s*\(\s*[\'\"](DB_.*?)[\'\"]\s*\,\s*[\'\"](.*?)[\'\"]\s*\);/',$rawconfig,$matches,PREG_SET_ORDER);
 	foreach($matches as $row){
 		$options[$row[1]]=$row[2];
 	}
-	
+
 	preg_match('/\$table_prefix\s*=\s*[\'\"](.*?)[\'\"];/',$rawconfig,$matches);
 	$table_prefix=$matches[1];
-	
+
 	$db = new mysqli($options["DB_HOST"], $options["DB_USER"], $options["DB_PASSWORD"], $options["DB_NAME"]);
-		
+
 	function get_option($option){
 		global $db;
 		global $table_prefix;
@@ -161,9 +167,9 @@ if (defined( 'WPINC' ) ) {
 	//if(! defined('WATERMARK_OVERLAY_IMAGE') )     define( 'WATERMARK_OVERLAY_IMAGE', 'vg-watermark2017.png');
 
 	//function get_option(){return null;}
-	
+
 	$ALLOWED_SITES = get_option("vjtt_allowedsites") ? explode(",",get_option("vjtt_allowedsites")) : [];
-	
+
 	define("WATERMARK_OFFSET_W",(int)get_option("vjtt_watermarkoffsetw") ?? 20);
 	define("WATERMARK_OFFSET_H",(int)get_option("vjtt_watermarkoffseth") ?? 0);
 	define("WATERMARK_OVERLAY_IMAGE", get_option("vjtt_watermarkfile") ?? null);
@@ -206,6 +212,7 @@ if (defined( 'WPINC' ) ) {
 			$tim->handleErrors();
 			exit(0);
 		}
+
 		public function __construct(){
 			global $ALLOWED_SITES;
 			$this->startTime = microtime(true);
@@ -232,12 +239,12 @@ if (defined( 'WPINC' ) ) {
 			}
 			//Clean the cache before we do anything because we don't want the first visitor after FILE_CACHE_TIME_BETWEEN_CLEANS expires to get a stale image. 
 			$this->cleanCache();
-			
+
 			$this->myHost = preg_replace('/^www\./i', '', $_SERVER['HTTP_HOST']);
 			$this->src = $this->param('src');
 			$this->url = parse_url($this->src);
 			$this->src = preg_replace('/https?:\/\/(?:www\.)?' . $this->myHost . '/i', '', $this->src);
-			
+
 			if(strlen($this->src) <= 3){
 				$this->error("No image specified");
 				return false;
@@ -305,12 +312,14 @@ if (defined( 'WPINC' ) ) {
 
 			return true;
 		}
+
 		public function __destruct(){
 			foreach($this->toDeletes as $del){
 				$this->debug(2, "Deleting temp file $del");
 				@unlink($del);
 			}
 		}
+
 		public function run(){
 			if($this->isURL){
 				if(! ALLOW_EXTERNAL){
@@ -323,13 +332,13 @@ if (defined( 'WPINC' ) ) {
 					$this->debug(3, "webshot is NOT set so we're going to try to fetch a regular image.");
 					$this->serveExternalImage();
 
-				
 			} else {
 				$this->debug(3, "Got request for internal image. Starting serveInternalImage()");
 				$this->serveInternalImage();
 			}
 			return true;
 		}
+
 		protected function handleErrors(){
 			if($this->haveErrors()){ 
 				if(NOT_FOUND_IMAGE && $this->is404()){
@@ -351,6 +360,7 @@ if (defined( 'WPINC' ) ) {
 			}
 			return false;
 		}
+
 		protected function tryBrowserCache(){
 			if(BROWSER_CACHE_DISABLE){ $this->debug(3, "Browser caching is disabled"); return false; }
 			if(!empty($_SERVER['HTTP_IF_MODIFIED_SINCE']) ){
@@ -388,6 +398,7 @@ if (defined( 'WPINC' ) ) {
 			}
 			return false;
 		}
+
 		protected function tryServerCache(){
 			$this->debug(3, "Trying server cache");
 			if(file_exists($this->cachefile)){
@@ -422,18 +433,21 @@ if (defined( 'WPINC' ) ) {
 				}
 			}
 		}
+
 		protected function error($err){
 			$this->debug(3, "Adding error message: $err");
 			$this->errors[] = $err;
 			return false;
 
 		}
+
 		protected function haveErrors(){
 			if(sizeof($this->errors) > 0){
 				return true;
 			}
 			return false;
 		}
+
 		protected function serveErrors(){
 			header ($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request');
 			$html = '<ul>';
@@ -444,6 +458,7 @@ if (defined( 'WPINC' ) ) {
 			echo '<h1>A TimThumb error has occured</h1>The following error(s) occured:<br />' . $html . '<br />';
 			echo '<br />Query String : ' . htmlentities ($_SERVER['QUERY_STRING']);
 		}
+
 		protected function serveInternalImage(){
 			$this->debug(3, "Local image path is $this->localImage");
 			if(! $this->localImage){
@@ -467,13 +482,14 @@ if (defined( 'WPINC' ) ) {
 				return false;
 			}
 		}
+
 		protected function cleanCache(){
 			if (FILE_CACHE_TIME_BETWEEN_CLEANS < 0) {
 				return;
 			}
 			$this->debug(3, "cleanCache() called");
 			$lastCleanFile = $this->cacheDirectory . '/timthumb_cacheLastCleanTime.touch';
-			
+
 			//If this is a new timthumb installation we need to create the file
 			if(! is_file($lastCleanFile)){
 				$this->debug(1, "File tracking last clean doesn't exist. Creating $lastCleanFile");
@@ -504,6 +520,7 @@ if (defined( 'WPINC' ) ) {
 			}
 			return false;
 		}
+
 		protected function processImageAndWriteToCache($localImage){
 			$sData = getimagesize($localImage);
 			$origType = $sData[2];
@@ -534,7 +551,7 @@ if (defined( 'WPINC' ) ) {
 				);
 			}
 
-			// get standard input properties		
+			// get standard input properties
 			$new_width =  (int) abs ($this->param('w', 0));
 			$new_height = (int) abs ($this->param('h', 0));
 			$zoom_crop = (int) $this->param('zc', DEFAULT_ZC);
@@ -598,7 +615,7 @@ if (defined( 'WPINC' ) ) {
 
 			// create a new true color image
 			$canvas = imagecreatetruecolor ($new_width, $new_height);
-			
+
 			imagealphablending ($canvas, false);
 
 			if (strlen($canvas_color) == 3) { //if is 3-char notation, edit string into 6-char notation
@@ -612,10 +629,10 @@ if (defined( 'WPINC' ) ) {
 			$canvas_color_B = hexdec (substr ($canvas_color, 4, 2));
 
 			// Create a new transparent color for image
-			// If is a png and PNG_IS_TRANSPARENT is false then remove the alpha transparency 
+			// If is a png and PNG_IS_TRANSPARENT is false then remove the alpha transparency
 			// (and if is set a canvas color show it in the background)
-			if(preg_match('/^image\/png$/i', $mimeType) && !PNG_IS_TRANSPARENT && $canvas_trans){ 
-				$color = imagecolorallocatealpha ($canvas, $canvas_color_R, $canvas_color_G, $canvas_color_B, 127);		
+			if(preg_match('/^image\/png$/i', $mimeType) && !PNG_IS_TRANSPARENT && $canvas_trans){
+				$color = imagecolorallocatealpha ($canvas, $canvas_color_R, $canvas_color_G, $canvas_color_B, 127);
 			}else{
 				$color = imagecolorallocatealpha ($canvas, $canvas_color_R, $canvas_color_G, $canvas_color_B, 0);
 			}
@@ -753,15 +770,15 @@ if (defined( 'WPINC' ) ) {
 				imagealphablending($canvas, false );
 				imagesavealpha($canvas , true);
 			}
-			
+
 			/*if($settext){
 				$black = imagecolorallocate($canvas, 0, 0, 0);
 				$white = imagecolorallocate($canvas, 255, 255, 255);
-				
+
 				imagettftextblur($canvas,24,0,122,122,$white,dirname(parse_url(__FILE__,PHP_URL_PATH))."/msjh.ttf",$settext,3);
 				imagettftext($canvas,24,0,122,122,$black,dirname(parse_url(__FILE__,PHP_URL_PATH))."/msjh.ttf",$settext);
-				
-				//exit();	
+
+				//exit();
 			}*/
 
 
@@ -893,6 +910,7 @@ if (defined( 'WPINC' ) ) {
 			$this->docRoot = $docRoot;
 
 		}
+
 		protected function getLocalImagePath($src){
 			$src = ltrim($src, '/'); //strip off the leading '/'
 			if(! $this->docRoot){
@@ -928,9 +946,9 @@ if (defined( 'WPINC' ) ) {
 					//and continue search
 				}
 			}
-			
+
 			$base = $this->docRoot;
-			
+
 			// account for Windows directory structure
 			if (strstr($_SERVER['SCRIPT_FILENAME'],':')) {
 				$sub_directories = explode('\\', str_replace($this->docRoot, '', $_SERVER['SCRIPT_FILENAME']));
@@ -954,6 +972,7 @@ if (defined( 'WPINC' ) ) {
 			}
 			return false;
 		}
+
 		protected function realpath($path){
 			//try to remove any relative paths
 			$remove_relatives = '/\w+\/\.\.\//';
@@ -964,10 +983,12 @@ if (defined( 'WPINC' ) ) {
 			//if using realpath, any symlinks will also be resolved
 			return preg_match('#^\.\./|/\.\./#', $path) ? realpath($path) : $path;
 		}
+
 		protected function toDelete($name){
 			$this->debug(3, "Scheduling file $name to delete on destruct.");
 			$this->toDeletes[] = $name;
 		}
+
 		protected function serveExternalImage(){
 			if(! preg_match('/^https?:\/\/[a-zA-Z0-9\-\.]+/i', $this->src)){
 				$this->error("Invalid URL supplied.");
@@ -1000,6 +1021,7 @@ if (defined( 'WPINC' ) ) {
 				return false;
 			}
 		}
+
 		public static function curlWrite($h, $d){
 			fwrite(self::$curlFH, $d);
 			self::$curlDataWritten += strlen($d);
@@ -1009,6 +1031,7 @@ if (defined( 'WPINC' ) ) {
 				return strlen($d);
 			}
 		}
+
 		protected function serveCacheFile(){
 			$this->debug(3, "Serving {$this->cachefile}");
 			if(! is_file($this->cachefile)){
@@ -1067,8 +1090,9 @@ if (defined( 'WPINC' ) ) {
 			}
 			return true;
 		}
-		protected function securityChecks(){
-		}
+
+		protected function securityChecks(){}
+
 		protected function param($property, $default = ''){
 			if (isset ($_GET[$property])) {
 				return $_GET[$property];
@@ -1076,6 +1100,7 @@ if (defined( 'WPINC' ) ) {
 				return $default;
 			}
 		}
+
 		protected function openImage($mimeType, $src){
 			switch ($mimeType) {
 				case 'image/jpeg':
@@ -1091,7 +1116,7 @@ if (defined( 'WPINC' ) ) {
 				case 'image/gif':
 					$image = imagecreatefromgif ($src);
 					break;
-				
+
 				default:
 					$this->error("Unrecognised mimeType");
 			}
@@ -1113,6 +1138,7 @@ if (defined( 'WPINC' ) ) {
 				return "UNKNOWN";
 			}
 		}
+
 		protected function debug($level, $msg){
 			if(DEBUG_ON && $level <= DEBUG_LEVEL){
 				$execTime = sprintf('%.6f', microtime(true) - $this->startTime);
@@ -1124,9 +1150,11 @@ if (defined( 'WPINC' ) ) {
 				error_log("TimThumb Debug line " . __LINE__ . " [$execTime : $tick]: $msg");
 			}
 		}
+
 		protected function sanityFail($msg){
 			return $this->error("There is a problem in the timthumb code. Message: Please report this error at <a href='http://code.google.com/p/timthumb/issues/list'>timthumb's bug tracking page</a>: $msg");
 		}
+
 		protected function getMimeType($file){
 			$info = getimagesize($file);
 			if(is_array($info) && $info['mime']){
@@ -1134,6 +1162,7 @@ if (defined( 'WPINC' ) ) {
 			}
 			return '';
 		}
+
 		protected function setMemoryLimit(){
 			$inimem = ini_get('memory_limit');
 			$inibytes = timthumb::returnBytes($inimem);
@@ -1145,6 +1174,7 @@ if (defined( 'WPINC' ) ) {
 				$this->debug(3, "Not adjusting memory size because the current setting is " . $inimem . " and our size of " . MEMORY_LIMIT . " is smaller.");
 			}
 		}
+
 		protected static function returnBytes($size_str){
 			switch (substr ($size_str, -1))
 			{
@@ -1154,7 +1184,7 @@ if (defined( 'WPINC' ) ) {
 				default: return $size_str;
 			}
 		}
-		
+
 		protected function getURL($url, $tempfile){
 			$this->lastURLError = false;
 			$url = preg_replace('/ /', '%20', $url);
@@ -1176,7 +1206,7 @@ if (defined( 'WPINC' ) ) {
 				curl_setopt ($curl, CURLOPT_WRITEFUNCTION, 'timthumb::curlWrite');
 				@curl_setopt ($curl, CURLOPT_FOLLOWLOCATION, true);
 				@curl_setopt ($curl, CURLOPT_MAXREDIRS, 10);
-				
+
 				$curlResult = curl_exec($curl);
 				fclose(self::$curlFH);
 				$httpStatus = curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -1218,6 +1248,7 @@ if (defined( 'WPINC' ) ) {
 			}
 
 		}
+
 		protected function serveImg($file){
 			$s = getimagesize($file);
 			if(! ($s && $s['mime'])){
@@ -1239,16 +1270,19 @@ if (defined( 'WPINC' ) ) {
 			return false;
 
 		}
+
 		protected function set404(){
 			$this->is404 = true;
 		}
+
 		protected function is404(){
 			return $this->is404;
 		}
 	}
 
-	if(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH) =="/wp-content/plugins/vj-timthumb/vj-timthumb.php"){
+	if(parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH) == "/wp-content/plugins/vj-timthumb/vj-timthumb.php"){
 		timthumb::start();
 	}
 
 }
+?>
